@@ -1,0 +1,49 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          sense-hat-rest
+# Required-Start:    $network
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Sense HAT Raspberry Pi REST API
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Sense HAT Raspberry Pi REST API"
+NAME=sense-hat-rest
+DAEMON="/usr/bin/$NAME.py"
+PORT="80"
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+    log_begin_msg "Starting $DESC"
+    start-stop-daemon --start --make-pidfile --pidfile $PIDFILE --background --exec $DAEMON -- $PORT
+    log_end_msg $?
+    exit 0
+    ;;
+  stop)
+    log_begin_msg "Stopping $DESC"
+    start-stop-daemon --stop --remove-pidfile --pidfile $PIDFILE 
+    log_end_msg $?
+    exit 0
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart}"
+    exit 1
+    ;;
+esac
