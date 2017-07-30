@@ -16,13 +16,13 @@ To build the package:
 makeself ./sense-hat-rest sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
 ```
 
-Note: if you do not already have makeself installed, run:
+Note: if you do not already have makeself installed:
 
 ```sh
 sudo apt-get install makeself
 ```
 
-To install the package, on your Raspberry Pi run:
+To install the package:
 
 ```sh
 sudo ./sense-hat-rest.run
@@ -30,12 +30,12 @@ sudo ./sense-hat-rest.run
 
 For usage, navigate to `http://localhost/`
 
-To get live sensor json, navigate to `http://localhost/live/humidity`
+To get live sensor json, navigate to the live directory `http://localhost/live/humidity`
 
 ```json
 {"humidity": 28.66579818725586}
 ```
 
-You can also view historical sensor graphs by navigating to the html directory `http://localhost/html/humidity`
+To view historical sensor data, navigate to the html directory `http://localhost/html/humidity`
 
 ![humidity](https://raw.githubusercontent.com/jithware/sense-hat-rest/master/images/humidity.png)
