@@ -1,0 +1,11 @@
+[Unit]
+Description=Sense HAT Raspberry Pi REST API
+After=network.target 
+
+[Service]
+ExecStart=/usr/bin/sense-hat-rest.py 80
+StandardOutput=null
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=sense-hat-rest.service
