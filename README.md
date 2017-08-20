@@ -2,12 +2,40 @@
 
 This project exposes an REST end point on a [Raspberry Pi Sense HAT](http://amzn.to/2eWl5wz) using python.
 
-To build the package, on your Raspberry Pi run:
+Run the following commands on your Raspberry Pi:
 
-`makeself ./sense-hat-rest sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh`
+To download the source:
 
-To install the package run:
+```sh
+git clone https://github.com/jithware/sense-hat-rest.git
+```
 
-`sudo ./sense-hat-rest.run`
+To build the package:
 
-For usage, navigate to `http://localhost/` on your Raspberry Pi
+```sh
+makeself ./sense-hat-rest sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
+```
+
+Note: if you do not already have makeself installed:
+
+```sh
+sudo apt-get install makeself
+```
+
+To install the package:
+
+```sh
+sudo ./sense-hat-rest.run
+```
+
+For usage, navigate to `http://localhost/`
+
+To get live sensor json, navigate to the live directory `http://localhost/live/humidity`
+
+```json
+{"humidity": 28.66579818725586}
+```
+
+To view historical sensor data, navigate to the html directory `http://localhost/html/humidity`
+
+![humidity](https://raw.githubusercontent.com/jithware/sense-hat-rest/master/images/humidity.png)
