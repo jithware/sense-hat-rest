@@ -7,14 +7,14 @@ apt-get -y install python-sense-hat python3-sense-hat rrdtool python-rrdtool
 easy_install web.py
 
 # copy over the files
-install -v ./sense-hat-rest /etc/init.d/ # rest api service
 install -v ./sense-hat-rest.py /usr/bin/ # rest api script
+install -v ./sense-hat-rest.service /lib/systemd/system/ # rest api service
 
 # enable service
-update-rc.d sense-hat-rest defaults
+systemctl enable sense-hat-rest.service
 
 # restart the daemon
-service sense-hat-rest restart
+systemctl restart sense-hat-rest.service
 
 echo ""
 echo "For usage see: http://localhost/"
