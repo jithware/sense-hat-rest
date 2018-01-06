@@ -146,7 +146,7 @@ class get_image:
 	CELSIUSLINE='LINE2:celsius#FF0000:celsius'
 	CELSIUSGPRINT='GPRINT:celsius:LAST:Current\: %.1lf'
 	#FAHRCDEF='CDEF:fahr=9,5,/,celsius,*,32,+' # true conversion of C to F
-	FAHRCDEF='CDEF:fahr=9,5,/,celsius,*,0,+' # calibrated for radiant circuit board heat
+	FAHRCDEF='CDEF:fahr=9,5,/,celsius,*,-6,+' # calibrated for radiant circuit board heat
 	FAHRVDEF='VDEF:date=fahr,LAST'
 	FAHRLINE='LINE2:fahr#FFA500:fahrenheit'
 	FAHRGPRINT='GPRINT:fahr:LAST:Current\: %.1lf'
