@@ -1,6 +1,6 @@
 # The Sense HAT Raspberry Pi REST API
 
-This project exposes an REST end point on a [Raspberry Pi Sense HAT](http://amzn.to/2eWl5wz) using python.
+This project exposes a REST end point on a [Raspberry Pi Sense HAT](http://amzn.to/2eWl5wz) using python.
 
 Run the following commands on your Raspberry Pi:
 
