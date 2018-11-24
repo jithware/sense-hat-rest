@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import web, json, rrdtool, tempfile, time, threading, os
+import web, json, rrdtool, tempfile, time, threading, os, subprocess
 from sense_hat import SenseHat, ACTION_HELD
 
 sense = SenseHat()
@@ -46,13 +46,15 @@ def get_sensor(sensor):
 		data[sensor] = sense.accelerometer
 	elif sensor == 'accelerometer_raw':
 		data[sensor] = sense.accelerometer_raw
+        elif sensor == 'temperature_cpu':
+                data[sensor] = float(subprocess.check_output("cat /sys/class/thermal/thermal_zone0/temp", shell=True))/1000
 		
 	sense.set_imu_config(True, True, True)
 			
 	return data	
 
 # rrdtool data gather thread
-RRDSENSORS = ['humidity', 'temperature', 'pressure', 'compass']
+RRDSENSORS = ['humidity', 'temperature', 'pressure', 'compass', 'temperature_cpu']
 def rrdthread(database, step):
 	while True:
 		template = ''
@@ -73,7 +75,7 @@ STEP=60 # number of seconds between each data point
 DBFILE = '/var/tmp/sense-hat.rrd'
 DBDAYS=365 # number of days to retain data			
 if not (os.path.exists(DBFILE)):
-	args = ["--start", "N", "--step", "%s" % STEP, "DS:humidity:GAUGE:%s:0:100" % (STEP*2), "DS:temperature:GAUGE:%s:-100:100" % (STEP*2), "DS:pressure:GAUGE:%s:850:1100" % (STEP*2), "DS:compass:GAUGE:%s:0:360" % (STEP*2), "RRA:MAX:0.5:1:%s" %(int(60/STEP*60*24*DBDAYS))]
+	args = ["--start", "N", "--step", "%s" % STEP, "DS:humidity:GAUGE:%s:0:100" % (STEP*2), "DS:temperature:GAUGE:%s:-100:100" % (STEP*2), "DS:temperature_cpu:GAUGE:%s:-100:100" % (STEP*2), "DS:pressure:GAUGE:%s:850:1100" % (STEP*2), "DS:compass:GAUGE:%s:0:360" % (STEP*2), "RRA:MAX:0.5:1:%s" %(int(60/STEP*60*24*DBDAYS))]
     	print 'Creating database %s with args %s' %(DBFILE, args)
     	rrdtool.create(DBFILE, args)
 
@@ -83,8 +85,8 @@ thread.start()
 
 LIVESENSORS = RRDSENSORS + ['temperature_from_humidity', 'temperature_from_pressure', 'orientation_radians', 'orientation_degrees', 'orientation', 'compass_raw', 'gyroscope', 'gyroscope_raw', 'accelerometer', 'accelerometer_raw']
 PASTSENSORS = RRDSENSORS + ['all']
-IMAGES = RRDSENSORS
-HTML = PASTSENSORS
+IMAGES = ['humidity', 'temperature', 'pressure', 'compass']
+HTML = IMAGES + ['all']
 
 # web api
 urls = (
@@ -143,10 +145,14 @@ class get_image:
 	HUMIDLINE='LINE2:humidity#0000FF:humidity'
 	HUMIDGPRINT='GPRINT:humidity:LAST:Current\: %.1lf'
 	CELSIUSDEF='DEF:celsius=%s:temperature:MAX' %DBFILE
-	CELSIUSLINE='LINE2:celsius#FF0000:celsius'
+	CELSIUSLINE='LINE2:celsius#FF00FF:celsius'
 	CELSIUSGPRINT='GPRINT:celsius:LAST:Current\: %.1lf'
-	#FAHRCDEF='CDEF:fahr=9,5,/,celsius,*,32,+' # true conversion of C to F
-	FAHRCDEF='CDEF:fahr=9,5,/,celsius,*,-6,+' # calibrated for radiant circuit board heat
+	CPUCELSIUSDEF='DEF:cpucelsius=%s:temperature_cpu:MAX' %DBFILE
+	CALFAHRCDEF='CDEF:cpufahr=9,5,/,cpucelsius,*,32,+' # conversion of C to F
+	CALFAHRLINE='LINE2:cpufahr#FF0000:cpu'
+	CALCELSIUSCDEF='CDEF:calcelsius=cpucelsius,celsius,-,-1,*,celsius,+'
+	CALCELSIUSGPRINT='GPRINT:calcelsius:LAST:Current\: %.1lf'
+	FAHRCDEF='CDEF:fahr=9,5,/,calcelsius,*,32,+' # conversion of C to F
 	FAHRVDEF='VDEF:date=fahr,LAST'
 	FAHRLINE='LINE2:fahr#FFA500:fahrenheit'
 	FAHRGPRINT='GPRINT:fahr:LAST:Current\: %.1lf'
@@ -170,7 +176,7 @@ class get_image:
 	if action == 'humidity':
 		args += ["--vertical-label", "percent", "%s" %HUMIDDEF, "%s" %HUMIDVDEF, "%s" %HUMIDLINE, "%s" %HUMIDGPRINT]
 	elif action == 'temperature':
-		args += ["--vertical-label", "degrees", "%s" %CELSIUSDEF, "%s" %FAHRCDEF, "%s" %FAHRVDEF, "%s" %FAHRLINE, "%s" %FAHRGPRINT]
+		args += ["--vertical-label", "degrees", "%s" %CELSIUSDEF, "%s" %CPUCELSIUSDEF, "%s" %CALFAHRCDEF, "%s" %CALCELSIUSCDEF, "%s" %FAHRCDEF, "%s" %FAHRVDEF, "%s" %FAHRLINE, "%s" %FAHRGPRINT]
 	elif action == 'pressure':
 		args += ["--vertical-label", "millibars", "--upper-limit", "1100", "--lower-limit", "850", "%s" %PRESDEF, "%s" %PRESVDEF, "%s" %PRESLINE, "%s" %PRESGPRINT]
 	elif action == 'compass':
