@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-import web, json, rrdtool, tempfile, time, threading, os, subprocess
+import web, json, rrdtool, tempfile, time, threading, os, subprocess, ConfigParser
 from sense_hat import SenseHat, ACTION_HELD
 
 sense = SenseHat()
+
+config = ConfigParser.ConfigParser()
+config.read("/etc/sense-hat-rest.conf")
 
 # OPTIONAL: clean shutdown when joystick held down
 def pushed_middle(event):
@@ -71,16 +74,16 @@ def rrdthread(database, step):
 		time.sleep(step)
 
 # initialize database	
-STEP=60 # number of seconds between each data point
-DBFILE = '/var/tmp/sense-hat.rrd'
-DBDAYS=365 # number of days to retain data			
+DBSTEP=config.getint('rrd', 'DBSTEP') # number of seconds between each data point
+DBFILE=config.get('rrd', 'DBFILE') # database file path
+DBDAYS=config.getint('rrd', 'DBDAYS') # number of days to retain data			
 if not (os.path.exists(DBFILE)):
-	args = ["--start", "N", "--step", "%s" % STEP, "DS:humidity:GAUGE:%s:0:100" % (STEP*2), "DS:temperature:GAUGE:%s:-100:100" % (STEP*2), "DS:temperature_cpu:GAUGE:%s:-100:100" % (STEP*2), "DS:pressure:GAUGE:%s:850:1100" % (STEP*2), "DS:compass:GAUGE:%s:0:360" % (STEP*2), "RRA:MAX:0.5:1:%s" %(int(60/STEP*60*24*DBDAYS))]
+	args = ["--start", "N", "--step", "%s" % DBSTEP, "DS:humidity:GAUGE:%s:0:100" % (DBSTEP*2), "DS:temperature:GAUGE:%s:-100:100" % (DBSTEP*2), "DS:temperature_cpu:GAUGE:%s:-100:100" % (DBSTEP*2), "DS:pressure:GAUGE:%s:850:1100" % (DBSTEP*2), "DS:compass:GAUGE:%s:0:360" % (DBSTEP*2), "RRA:MAX:0.5:1:%s" %(int(60/DBSTEP*60*24*DBDAYS))]
     	print 'Creating database %s with args %s' %(DBFILE, args)
     	rrdtool.create(DBFILE, args)
 
 # start sensor data gather thread
-thread = threading.Thread(target=rrdthread, args=[DBFILE, STEP])
+thread = threading.Thread(target=rrdthread, args=[DBFILE, DBSTEP])
 thread.start()
 
 LIVESENSORS = RRDSENSORS + ['temperature_from_humidity', 'temperature_from_pressure', 'orientation_radians', 'orientation_degrees', 'orientation', 'compass_raw', 'gyroscope', 'gyroscope_raw', 'accelerometer', 'accelerometer_raw']
@@ -205,7 +208,7 @@ class get_html:
     	sensor = str(action)
     	query = '?start=%s&width=%s&height=%s' %(start, width, height)
     	
-    	data = '<html><head><meta http-equiv="refresh" content="%s"><title>%s</title></head>' % (STEP, sensor)
+    	data = '<html><head><meta http-equiv="refresh" content="%s"><title>%s</title></head>' % (DBSTEP, sensor)
     	if action in IMAGES:
     		image = '/image/%s%s' %(sensor, query)
 		data += '<a href="%s"><img src="%s"/></a>' % (image, image)

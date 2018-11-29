@@ -7,8 +7,10 @@ apt-get -y install python-sense-hat python3-sense-hat rrdtool python-rrdtool
 easy_install web.py
 
 # copy over the files
+install -v ./sense-hat-rest.conf /etc # configuration file
 install -v ./sense-hat-rest.py /usr/bin/ # rest api script
 install -v ./sense-hat-rest.service /lib/systemd/system/ # rest api service
+install -v -d /var/cache/sense-hat # database path
 
 # enable service
 systemctl enable sense-hat-rest.service
