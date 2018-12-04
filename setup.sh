@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # install required packages
-apt-get -y install python-sense-hat python3-sense-hat rrdtool python-rrdtool
+apt-get -y install python-sense-hat python3-sense-hat rrdtool python-rrdtool python-requests
 
 # install required python modules
 easy_install web.py

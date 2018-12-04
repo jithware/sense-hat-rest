@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import web, json, rrdtool, tempfile, time, threading, os, subprocess, ConfigParser
+import web, json, rrdtool, tempfile, time, threading, os, subprocess, ConfigParser, requests
 from sense_hat import SenseHat, ACTION_HELD
 
 sense = SenseHat()
 
-config = ConfigParser.ConfigParser()
+config = ConfigParser.ConfigParser(allow_no_value=True)
 config.read("/etc/sense-hat-rest.conf")
 
 # OPTIONAL: clean shutdown when joystick held down
@@ -72,6 +72,61 @@ def rrdthread(database, step):
 		args += [template, data]
 		rrdtool.update(database, args);
 		time.sleep(step)
+
+# ifttt notification
+IFTTTKEY=config.get('notify', 'IFTTTKEY')
+IFTTTEVENT=config.get('notify', 'IFTTTEVENT')
+def ifttt_send(message):
+	url='https://maker.ifttt.com/trigger/' + IFTTTEVENT + '/with/key/' + IFTTTKEY
+	headers = {'Accept': 'application/json', 'Content-type': 'application/json'}
+	payload = {'value1': message}
+	r = requests.post(url, headers=headers, json=payload)
+	return r.text
+
+# celsius to fahrenheit
+def celsiustofahr(celsius):
+	fahr = (celsius * 9/5) + 32
+	return fahr
+
+# get current fahrenheit temperature
+def getfahr():
+	json = get_sensor('temperature')
+	celsius = json["temperature"]
+	json = get_sensor('temperature_cpu')
+	cpu = json["temperature_cpu"]
+	adjusted = celsius - ((cpu - celsius) * 1.1) # adjust for cpu radiant heat
+	return celsiustofahr(adjusted)
+
+# temperature to string
+def strtemp(temp):
+	return "%.1f" % temp
+
+# notification thread
+NOTIFYSTEP=config.getint('notify', 'NOTIFYSTEP')
+MINTEMP=config.getfloat('notify', 'MINTEMP')
+MAXTEMP=config.getfloat('notify', 'MAXTEMP')
+def notifythread():
+	while True:
+		temp = getfahr()
+		if temp < MINTEMP:
+			message = 'WARNING: current temp ' + strtemp(temp) + ' is below min ' + strtemp(MINTEMP)
+			print(message)
+			if IFTTTKEY and IFTTTEVENT:
+				response = ifttt_send(message)
+				print(response)
+		if temp > MAXTEMP:
+			message = 'WARNING: current temp ' + strtemp(temp) + ' is above max ' + strtemp(MAXTEMP)
+			print(message)
+			if IFTTTKEY and IFTTTEVENT:
+                                response = ifttt_send(message)
+                                print(response)
+		time.sleep(NOTIFYSTEP)
+
+# start notfication thread
+if NOTIFYSTEP > 0:
+	thread = threading.Thread(target=notifythread)
+	thread.start()
+		
 
 # initialize database	
 DBSTEP=config.getint('rrd', 'DBSTEP') # number of seconds between each data point
@@ -153,7 +208,7 @@ class get_image:
 	CPUCELSIUSDEF='DEF:cpucelsius=%s:temperature_cpu:MAX' %DBFILE
 	CALFAHRCDEF='CDEF:cpufahr=9,5,/,cpucelsius,*,32,+' # conversion of C to F
 	CALFAHRLINE='LINE2:cpufahr#FF0000:cpu'
-	CALCELSIUSCDEF='CDEF:calcelsius=cpucelsius,celsius,-,-1,*,celsius,+'
+	CALCELSIUSCDEF='CDEF:calcelsius=cpucelsius,celsius,-,-1.1,*,celsius,+'
 	CALCELSIUSGPRINT='GPRINT:calcelsius:LAST:Current\: %.1lf'
 	FAHRCDEF='CDEF:fahr=9,5,/,calcelsius,*,32,+' # conversion of C to F
 	FAHRVDEF='VDEF:date=fahr,LAST'
