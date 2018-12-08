@@ -2,7 +2,7 @@
 
 This project exposes a REST end point on a [Raspberry Pi Sense HAT](http://amzn.to/2eWl5wz) using python.
 
-Run the following commands on your Raspberry Pi:
+Run the following commands on your Raspberry Pi with a Sense HAT:
 
 To download the source:
 
@@ -10,7 +10,13 @@ To download the source:
 git clone https://github.com/jithware/sense-hat-rest.git
 ```
 
-To build the package:
+To install:
+
+```sh
+sudo ./setup.sh
+```
+
+To build the package (optional):
 
 ```sh
 makeself ./sense-hat-rest sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
@@ -30,12 +36,21 @@ sudo ./sense-hat-rest.run
 
 For usage, navigate to `http://localhost/`
 
-To get live sensor json, navigate to the live directory `http://localhost/live/humidity`
+To get live sensor json, navigate to the live directory `http://localhost/live/temperature`
 
 ```json
-{"humidity": 28.66579818725586}
+{"temperature": 25.48150062561035}
 ```
 
-To view historical sensor data, navigate to the html directory `http://localhost/html/humidity`
+To view historical sensor data, navigate to the html directory `http://localhost/html/temperature`
 
-![humidity](https://raw.githubusercontent.com/jithware/sense-hat-rest/master/images/humidity.png)
+![temperature](./images/temperature.png)
+
+To trigger an IFTTT event, create a webhook applet at [https://ifttt.com/services/maker_webhooks](https://ifttt.com/services/maker_webhooks) with a sense_hat event and update [sense-hat-rest.conf](./sense-hat-rest.conf) with your key and sensor values: 
+```
+[notify]
+
+IFTTTKEY=
+MINTEMP=
+MAXTEMP=
+```
