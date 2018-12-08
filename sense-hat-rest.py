@@ -76,10 +76,10 @@ def rrdthread(database, step):
 # ifttt notification
 IFTTTKEY=config.get('notify', 'IFTTTKEY')
 IFTTTEVENT=config.get('notify', 'IFTTTEVENT')
-def ifttt_send(message):
+def ifttt_send(value1,value2,value3):
 	url='https://maker.ifttt.com/trigger/' + IFTTTEVENT + '/with/key/' + IFTTTKEY
 	headers = {'Accept': 'application/json', 'Content-type': 'application/json'}
-	payload = {'value1': message}
+	payload = {'value1': value1,'value2': value2,'value3': value3}
 	r = requests.post(url, headers=headers, json=payload)
 	return r.text
 
@@ -112,13 +112,13 @@ def notifythread():
 			message = 'WARNING: current temp ' + strtemp(temp) + ' is below min ' + strtemp(MINTEMP)
 			print(message)
 			if IFTTTKEY and IFTTTEVENT:
-				response = ifttt_send(message)
+				response = ifttt_send(message, None, None)
 				print(response)
 		if temp > MAXTEMP:
 			message = 'WARNING: current temp ' + strtemp(temp) + ' is above max ' + strtemp(MAXTEMP)
 			print(message)
 			if IFTTTKEY and IFTTTEVENT:
-                                response = ifttt_send(message)
+                                response = ifttt_send(message, None, None)
                                 print(response)
 		time.sleep(NOTIFYSTEP)
 
