@@ -92,11 +92,8 @@ def celsiustofahr(celsius):
 # get current fahrenheit temperature
 def getfahr():
 	json = get_sensor('temperature')
-	celsius = json["temperature"]
-	json = get_sensor('temperature_cpu')
-	cpu = json["temperature_cpu"]
-	adjusted = celsius - ((cpu - celsius) * 1.1) # adjust for cpu radiant heat
-	return celsiustofahr(adjusted)
+	temperature = json["temperature"]
+	return celsiustofahr(temperature)
 
 # temperature to string
 def strtemp(temp):
