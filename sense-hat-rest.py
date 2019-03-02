@@ -18,13 +18,14 @@ def pushed_middle(event):
 sense.stick.direction_middle = pushed_middle
 
 # get sensor data
+TEMPCALIB=config.getfloat('sense-hat', 'TEMPCALIB')
 def get_sensor(sensor):
 	data = {}
 	
 	if sensor == 'humidity':
 		data[sensor] = sense.humidity
 	elif sensor == 'temperature':
-		data[sensor] = sense.temperature
+		data[sensor] = sense.temperature + TEMPCALIB
 	elif sensor == 'temperature_from_humidity':
 		data[sensor] = sense.get_temperature_from_humidity()
 	elif sensor == 'temperature_from_pressure':
@@ -49,8 +50,8 @@ def get_sensor(sensor):
 		data[sensor] = sense.accelerometer
 	elif sensor == 'accelerometer_raw':
 		data[sensor] = sense.accelerometer_raw
-        elif sensor == 'temperature_cpu':
-                data[sensor] = float(subprocess.check_output("cat /sys/class/thermal/thermal_zone0/temp", shell=True))/1000
+	elif sensor == 'temperature_cpu':
+		data[sensor] = float(subprocess.check_output("cat /sys/class/thermal/thermal_zone0/temp", shell=True))/1000
 		
 	sense.set_imu_config(True, True, True)
 			
@@ -143,7 +144,7 @@ thread.start()
 
 LIVESENSORS = RRDSENSORS + ['temperature_from_humidity', 'temperature_from_pressure', 'orientation_radians', 'orientation_degrees', 'orientation', 'compass_raw', 'gyroscope', 'gyroscope_raw', 'accelerometer', 'accelerometer_raw']
 PASTSENSORS = RRDSENSORS + ['all']
-IMAGES = ['humidity', 'temperature', 'pressure', 'compass']
+IMAGES = ['humidity', 'temperature', 'pressure', 'compass', 'temperature_cpu']
 HTML = IMAGES + ['all']
 
 # web api
@@ -202,18 +203,16 @@ class get_image:
 	HUMIDVDEF='VDEF:date=humidity,LAST'
 	HUMIDLINE='LINE2:humidity#0000FF:humidity'
 	HUMIDGPRINT='GPRINT:humidity:LAST:Current\: %.1lf'
-	CELSIUSDEF='DEF:celsius=%s:temperature:MAX' %DBFILE
-	CELSIUSLINE='LINE2:celsius#FF00FF:celsius'
-	CELSIUSGPRINT='GPRINT:celsius:LAST:Current\: %.1lf'
-	CPUCELSIUSDEF='DEF:cpucelsius=%s:temperature_cpu:MAX' %DBFILE
-	CALFAHRCDEF='CDEF:cpufahr=9,5,/,cpucelsius,*,32,+' # conversion of C to F
-	CALFAHRLINE='LINE2:cpufahr#FF0000:cpu'
-	CALCELSIUSCDEF='CDEF:calcelsius=cpucelsius,celsius,-,-1.1,*,celsius,+'
-	CALCELSIUSGPRINT='GPRINT:calcelsius:LAST:Current\: %.1lf'
-	FAHRCDEF='CDEF:fahr=9,5,/,calcelsius,*,32,+' # conversion of C to F
-	FAHRVDEF='VDEF:date=fahr,LAST'
-	FAHRLINE='LINE2:fahr#FFA500:fahrenheit'
-	FAHRGPRINT='GPRINT:fahr:LAST:Current\: %.1lf'
+	TEMPDEF='DEF:temperature=%s:temperature:MAX' %DBFILE
+	TEMPFAHRCDEF='CDEF:tempfahr=9,5,/,temperature,*,32,+' # conversion of C to F
+	TEMPFAHRVDEF='VDEF:date=tempfahr,LAST'
+	TEMPFAHRLINE='LINE2:tempfahr#FFA500:temperature'
+	TEMPFAHRGPRINT='GPRINT:tempfahr:LAST:Current\: %.1lf'
+	CPUTEMPDEF='DEF:temperature_cpu=%s:temperature_cpu:MAX' %DBFILE
+	CPUFAHRCDEF='CDEF:cpufahr=9,5,/,temperature_cpu,*,32,+' # conversion of C to F
+	CPUFAHRVDEF='VDEF:date=cpufahr,LAST'
+	CPUFAHRLINE='LINE2:cpufahr#FF0000:cpu'
+	CPUFAHRGPRINT='GPRINT:cpufahr:LAST:Current\: %.1lf'
 	PRESDEF='DEF:pressure=%s:pressure:MAX' %DBFILE
 	PRESVDEF='VDEF:date=pressure,LAST'	
 	PRESLINE='LINE2:pressure#00FF00:pressure'
@@ -224,17 +223,19 @@ class get_image:
 	COMPGPRINT='GPRINT:compass:LAST:Current\: %.1lf'
 	DATEGPRINT='GPRINT:date:%F %R:strftime'
 
-    	input = web.input(start='1h',width=600,height=400) # defaults
-    	start = str(input.start)
-    	width = str(input.width)
-    	height = str(input.height)
-    	sensor = str(action)
+	input = web.input(start='1h',width=600,height=400) # defaults
+	start = str(input.start)
+	width = str(input.width)
+	height = str(input.height)
+	sensor = str(action)
 
 	args = [ "--start", "-%s" %start, "--width", "%s" %width, "--height", "%s" %height, "--title", "%s" %sensor, "--watermark", "%s" %WATERMARK]
 	if action == 'humidity':
 		args += ["--vertical-label", "percent", "%s" %HUMIDDEF, "%s" %HUMIDVDEF, "%s" %HUMIDLINE, "%s" %HUMIDGPRINT]
 	elif action == 'temperature':
-		args += ["--vertical-label", "degrees", "%s" %CELSIUSDEF, "%s" %CPUCELSIUSDEF, "%s" %CALFAHRCDEF, "%s" %CALCELSIUSCDEF, "%s" %FAHRCDEF, "%s" %FAHRVDEF, "%s" %FAHRLINE, "%s" %FAHRGPRINT]
+		args += ["--vertical-label", "degrees f", "%s" %TEMPDEF, "%s" %TEMPFAHRCDEF, "%s" %TEMPFAHRVDEF, "%s" %TEMPFAHRLINE, "%s" %TEMPFAHRGPRINT]
+	elif action == 'temperature_cpu':
+		args += ["--vertical-label", "degrees f", "%s" %CPUTEMPDEF, "%s" %CPUFAHRCDEF, "%s" %CPUFAHRVDEF, "%s" %CPUFAHRLINE, "%s" %CPUFAHRGPRINT]
 	elif action == 'pressure':
 		args += ["--vertical-label", "millibars", "--upper-limit", "1100", "--lower-limit", "850", "%s" %PRESDEF, "%s" %PRESVDEF, "%s" %PRESLINE, "%s" %PRESGPRINT]
 	elif action == 'compass':
