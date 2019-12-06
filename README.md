@@ -46,7 +46,7 @@ To view historical sensor data, navigate to the html directory `http://localhost
 
 ![temperature](./images/temperature.png)
 
-To trigger an IFTTT event, create a webhook applet at [https://ifttt.com/services/maker_webhooks](https://ifttt.com/services/maker_webhooks) with a sense_hat event and update [sense-hat-rest.conf](./sense-hat-rest.conf) with your key and sensor values: 
+To trigger an IFTTT event, create a webhook applet at [ifttt.com](https://ifttt.com/create/if-maker_webhooks) with a sense_hat event and update [sense-hat-rest.conf](./sense-hat-rest.conf) with your key and sensor values: 
 ```
 [notify]
 

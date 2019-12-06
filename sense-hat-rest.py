@@ -318,7 +318,12 @@ class get_index:
 		data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
 	data = data[:-1] #remove last '|'
 	data += ']%s</p>' %IMAGEPARAMS
-    	
+
+	data += '<br>'
+	data += '<footer>'
+  	data += '<p>Created by <a href="https://github.com/jithware/sense-hat-rest">jithware</a></p>'
+	data += '</footer>'
+
     	data += '</html>'
 	
 	web.header("Content-Type", "text/html")
