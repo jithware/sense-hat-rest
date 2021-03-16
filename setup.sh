@@ -19,5 +19,5 @@ systemctl enable sense-hat-rest.service
 systemctl restart sense-hat-rest.service
 
 echo ""
-echo "For usage see: http://localhost/"
+echo "For usage see: http://localhost:8080/"
 echo ""
