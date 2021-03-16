@@ -34,15 +34,15 @@ To install the package:
 sudo ./sense-hat-rest.run
 ```
 
-For usage, navigate to `http://localhost/`
+For usage, navigate to `http://localhost:8080/`
 
-To get live sensor json, navigate to the live directory `http://localhost/live/temperature`
+To get live sensor json, navigate to the live directory `http://localhost:8080/live/temperature`
 
 ```json
 {"temperature": 25.48150062561035}
 ```
 
-To view historical sensor data, navigate to the html directory `http://localhost/html/temperature`
+To view historical sensor data, navigate to the html directory `http://localhost:8080/html/temperature`
 
 ![temperature](./images/temperature.png)
 
