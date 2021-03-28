@@ -1,10 +1,10 @@
 #! /bin/sh
 
 # install required packages
-apt-get -y install python-sense-hat python3-sense-hat rrdtool python-rrdtool python-requests
+apt-get -y install python3-sense-hat rrdtool python3-rrdtool python3-requests python3-pip
 
 # install required python modules
-easy_install web.py
+pip3 install web.py
 
 # copy over the files
 install -v ./sense-hat-rest.conf /etc # configuration file
