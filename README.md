@@ -19,7 +19,7 @@ sudo ./setup.sh
 To build the package (optional):
 
 ```sh
-makeself ./sense-hat-rest sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
+makeself --tar-extra "--exclude=.git* --exclude=images" ./ sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
 ```
 
 Note: if you do not already have makeself installed:
