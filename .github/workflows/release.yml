@@ -1,0 +1,25 @@
+name: Release
+
+on: 
+  release:
+    types: [created, published, prereleased]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install packages
+      run: sudo env DEBIAN_FRONTEND=noninteractive apt-get -qq -y install pbzip2 makeself
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Build release
+      run: makeself --tar-extra "--exclude=.git* --exclude=images" ./ sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
+
+    - name: Upload release
+      uses: fnkr/github-action-ghr@v1
+      env:
+        GHR_PATH: sense-hat-rest.run
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
