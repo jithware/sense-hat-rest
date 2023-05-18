@@ -4,37 +4,31 @@ This project exposes a REST end point on a [Raspberry Pi Sense HAT](https://www.
 
 Run the following commands on your Raspberry Pi with a Sense HAT:
 
-To download the source:
+## Install from release package
+```sh
+curl -sSL https://github.com/jithware/sense-hat-rest/releases/latest/download/sense-hat-rest.run -o sense-hat-rest.run 
+chmod +x sense-hat-rest.run
+sudo ./sense-hat-rest.run 
+```
+
+## Install from git
 
 ```sh
 git clone https://github.com/jithware/sense-hat-rest.git
-```
-
-To install:
-
-```sh
+cd sense-hat-rest
 sudo ./setup.sh
 ```
 
-To build the package (optional):
-
-```sh
-makeself --tar-extra "--exclude=.git* --exclude=images" ./ sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
-```
-
-Note: if you do not already have makeself installed:
+## Build the package (optional):
 
 ```sh
 sudo apt-get install makeself
+makeself --tar-extra "--exclude=.git* --exclude=images" ./ sense-hat-rest.run "Sense HAT Raspberry Pi REST API" ./setup.sh
 ```
 
-To install the package:
+## Usage
 
-```sh
-sudo ./sense-hat-rest.run
-```
-
-For usage, navigate to `http://localhost:8080/`
+For api the definitions, navigate to `http://localhost:8080/` 
 
 To get live sensor json, navigate to the live directory `http://localhost:8080/live/temperature`
 
@@ -45,6 +39,8 @@ To get live sensor json, navigate to the live directory `http://localhost:8080/l
 To view historical sensor data, navigate to the html directory `http://localhost:8080/html/temperature`
 
 ![temperature](./images/temperature.png)
+
+## IFTTT Event
 
 To trigger an IFTTT event, create a webhook applet at [ifttt.com](https://ifttt.com/create/if-maker_webhooks) with a sense_hat event and update [sense-hat-rest.conf](./sense-hat-rest.conf) with your key and sensor values: 
 ```
