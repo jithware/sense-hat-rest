@@ -24,13 +24,21 @@ cd sense-hat-rest
 For full api documentation, navigate to the sense-hat-rest [port](https://github.com/jithware/sense-hat-rest/blob/master/sense-hat-rest.service#L6) on your Raspberry Pi: `http://raspberrypi:8080/` 
 
 ### Examples
-To get live temperature sensor json, navigate to the live directory: `http://raspberrypi:8080/live/temperature`
+To retrieve live temperature json, GET temperature from the live directory: `http://raspberrypi:8080/live/temperature`
 
-```json
-{"temperature": 25.48150062561035}
+```sh
+curl -s http://raspberrypi:8080/live/temperature
+{"temperature": 16.162643432617188}
 ```
 
-To view historical temperature sensor data, navigate to the html directory: `http://raspberrypi:8080/html/temperature`
+To retrieve historical temperature json, GET temperature from the past directory: `http://raspberrypi:8080/past/temperature`
+
+```sh
+curl -s http://raspberrypi:8080/past/temperature?start=10m
+{"meta": {"start": 1684696560, "end": 1684697220, "step": 60, "rows": 11, "columns": 1, "legend": ["temperature"]}, "data": [[15.988164344996578], [15.923168208224487], [15.866838042416385], [15.864454833753204], [15.97578711801058], [15.895773634887693], [15.894235919783785], [15.910474543874104], [15.89725421391983], [15.908842296578978], [null]]}
+```
+
+To view historical temperature data, navigate to the html directory: `http://raspberrypi:8080/html/temperature`
 
 ![temperature](./images/temperature.png)
 
