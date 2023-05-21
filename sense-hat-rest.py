@@ -10,6 +10,7 @@ import os
 import subprocess
 import configparser
 import requests
+from datetime import datetime
 from sense_hat import SenseHat, ACTION_HELD
 
 sense = SenseHat()
@@ -247,7 +248,7 @@ class get_image:
         WATERMARK = 'Sense HAT Raspberry Pi'
 
         HUMIDDEF = 'DEF:humidity=%s:humidity:MAX' % DBFILE
-        HUMIDVDEF = 'VDEF:date=humidity,LAST'
+        HUMIDDATEVDEF = 'VDEF:date=humidity,LAST'
         HUMIDLINE = 'LINE2:humidity#0000FF:humidity'
         HUMIDGPRINT = 'GPRINT:humidity:LAST:Current\: %.1lf'
 
@@ -287,7 +288,7 @@ class get_image:
                 height, "--watermark", "%s" % WATERMARK]
         if action == 'humidity':
             args += ["--title", "Humidity", "--vertical-label", "percent", "%s" % HUMIDDEF,
-                     "%s" % HUMIDVDEF, "%s" % HUMIDLINE, "%s" % HUMIDGPRINT]
+                     "%s" % HUMIDDATEVDEF, "%s" % HUMIDLINE, "%s" % HUMIDGPRINT]
         elif action == 'temperature_c':
             args += ["--title", "Temperature", "--vertical-label", "degrees", "%s" %
                      TEMPDEF,  "%s" % TEMPDATEVDEF, "%s" % TEMPCELCLINE, "%s" % TEMPCELCGPRINT]
@@ -333,11 +334,11 @@ class get_html:
             DBSTEP, sensor)
         if action in IMAGES:
             image = '/image/%s%s' % (sensor, query)
-            data += '<a href="%s"><img src="%s"/></a>' % (image, image)
+            data += '<a href="%s" target="_blank"><img src="%s"/></a>' % (image, image)
         elif action == 'all':
             for i in IMAGES:
                 image = '/image/%s%s' % (i, query)
-                data += '<a href="%s"><img src="%s"/></a>' % (image, image)
+                data += '<a href="%s"target="_blank"><img src="%s"/></a>' % (image, image)
         else:
             raise web.notfound()
         data += '</html>'
@@ -355,6 +356,7 @@ class get_index:
         TITLE = 'Sense HAT REST API'
         PARAMS = '[?start=n[days|hours|minutes|seconds]]'
         IMAGEPARAMS = PARAMS + '[&width=n][&height=n]'
+        year = datetime.now().strftime("%Y")
 
         data = '<html><head><title>%s</title></head>' % TITLE
         data += '<h1>%s</h1>' % TITLE
@@ -390,11 +392,9 @@ class get_index:
         data = data[:-1]  # remove last '|'
         data += ']%s</p>' % IMAGEPARAMS
 
-        data += '<br>'
-        data += '<footer>'
-        data += '<p>Created by <a href="https://github.com/jithware/sense-hat-rest">jithware</a></p>'
+        data += '<br><footer>'
+        data += 'Copyright %s <a href="https://github.com/jithware/sense-hat-rest" target="_blank">Jithware</a>' % year
         data += '</footer>'
-
         data += '</html>'
 
         web.header("Content-Type", "text/html")

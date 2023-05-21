@@ -8,7 +8,7 @@ The following commands are run on your Raspberry Pi:
 ```sh
 curl -sSL https://github.com/jithware/sense-hat-rest/releases/latest/download/sense-hat-rest.run -o sense-hat-rest.run 
 chmod +x sense-hat-rest.run
-sudo ./sense-hat-rest.run 
+./sense-hat-rest.run 
 ```
 
 ## Install from git
@@ -16,7 +16,7 @@ sudo ./sense-hat-rest.run
 ```sh
 git clone https://github.com/jithware/sense-hat-rest.git
 cd sense-hat-rest
-sudo ./setup.sh
+./setup.sh
 ```
 
 ## Usage
@@ -49,5 +49,5 @@ MAXTEMP=
 
 To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command line:
 ```sh
-sudo sense-hat-rest.py
+sense-hat-rest.py
 ```
