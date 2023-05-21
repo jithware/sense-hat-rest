@@ -1,3 +1,4 @@
 .project
 .pydevproject
 sense-hat-rest.pyc
+__pycache__/

@@ -17,6 +17,7 @@ sense = SenseHat()
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("/etc/sense-hat-rest.conf")
 
+
 # OPTIONAL: clean shutdown when joystick held down
 
 
@@ -180,7 +181,8 @@ thread.start()
 LIVESENSORS = RRDSENSORS + ['temperature_from_humidity', 'temperature_from_pressure', 'orientation_radians',
                             'orientation_degrees', 'orientation', 'compass_raw', 'gyroscope', 'gyroscope_raw', 'accelerometer', 'accelerometer_raw']
 PASTSENSORS = RRDSENSORS + ['all']
-IMAGES = ['humidity', 'temperature', 'pressure', 'compass', 'temperature_cpu']
+IMAGES = ['humidity', 'temperature_c', 'temperature_f',
+          'pressure', 'compass', 'temperature_cpu']
 HTML = IMAGES + ['all']
 
 # web api
@@ -243,28 +245,36 @@ class get_image:
     def GET(self, action):
 
         WATERMARK = 'Sense HAT Raspberry Pi'
+
         HUMIDDEF = 'DEF:humidity=%s:humidity:MAX' % DBFILE
         HUMIDVDEF = 'VDEF:date=humidity,LAST'
         HUMIDLINE = 'LINE2:humidity#0000FF:humidity'
         HUMIDGPRINT = 'GPRINT:humidity:LAST:Current\: %.1lf'
+
         TEMPDEF = 'DEF:temperature=%s:temperature:MAX' % DBFILE
+        TEMPDATEVDEF = 'VDEF:date=temperature,LAST'
         TEMPFAHRCDEF = 'CDEF:tempfahr=9,5,/,temperature,*,32,+'  # conversion of C to F
-        TEMPFAHRVDEF = 'VDEF:date=tempfahr,LAST'
-        TEMPFAHRLINE = 'LINE2:tempfahr#FFA500:temperature'
-        TEMPFAHRGPRINT = 'GPRINT:tempfahr:LAST:Current\: %.1lf'
+        TEMPFAHRLINE = 'LINE2:tempfahr#FFA500:fahrenheit'
+        TEMPFAHRGPRINT = 'GPRINT:tempfahr:LAST:Current\: %.1lfF'
+        TEMPCELCLINE = 'LINE2:temperature#FF0000:celcius'
+        TEMPCELCGPRINT = 'GPRINT:temperature:LAST:Current\: %.1lfC'
+
         CPUTEMPDEF = 'DEF:temperature_cpu=%s:temperature_cpu:MAX' % DBFILE
         CPUFAHRCDEF = 'CDEF:cpufahr=9,5,/,temperature_cpu,*,32,+'  # conversion of C to F
-        CPUFAHRVDEF = 'VDEF:date=cpufahr,LAST'
-        CPUFAHRLINE = 'LINE2:cpufahr#FF0000:cpu'
-        CPUFAHRGPRINT = 'GPRINT:cpufahr:LAST:Current\: %.1lf'
+        CPUDATEVDEF = 'VDEF:date=temperature_cpu,LAST'
+        CPUCELCLINE = 'LINE2:temperature_cpu#FF0000:celcius'
+        CPUCELCGPRINT = 'GPRINT:temperature_cpu:LAST:Current\: %.1lfC'
+
         PRESDEF = 'DEF:pressure=%s:pressure:MAX' % DBFILE
-        PRESVDEF = 'VDEF:date=pressure,LAST'
+        PRESDATEVDEF = 'VDEF:date=pressure,LAST'
         PRESLINE = 'LINE2:pressure#00FF00:pressure'
         PRESGPRINT = 'GPRINT:pressure:LAST:Current\: %.1lf'
+
         COMPDEF = 'DEF:compass=%s:compass:MAX' % DBFILE
-        COMPVDEF = 'VDEF:date=compass,LAST'
+        COMPDATEVDEF = 'VDEF:date=compass,LAST'
         COMPLINE = 'LINE2:compass#FFFF00:compass'
         COMPGPRINT = 'GPRINT:compass:LAST:Current\: %.1lf'
+
         DATEGPRINT = 'GPRINT:date:%F %R:strftime'
 
         input = web.input(start='1h', width=600, height=400)  # defaults
@@ -274,22 +284,25 @@ class get_image:
         sensor = str(action)
 
         args = ["--start", "-%s" % start, "--width", "%s" % width, "--height", "%s" %
-                height, "--title", "%s" % sensor, "--watermark", "%s" % WATERMARK]
+                height, "--watermark", "%s" % WATERMARK]
         if action == 'humidity':
-            args += ["--vertical-label", "percent", "%s" % HUMIDDEF,
+            args += ["--title", "Humidity", "--vertical-label", "percent", "%s" % HUMIDDEF,
                      "%s" % HUMIDVDEF, "%s" % HUMIDLINE, "%s" % HUMIDGPRINT]
-        elif action == 'temperature':
-            args += ["--vertical-label", "degrees f", "%s" % TEMPDEF, "%s" %
-                     TEMPFAHRCDEF, "%s" % TEMPFAHRVDEF, "%s" % TEMPFAHRLINE, "%s" % TEMPFAHRGPRINT]
+        elif action == 'temperature_c':
+            args += ["--title", "Temperature", "--vertical-label", "degrees", "%s" %
+                     TEMPDEF,  "%s" % TEMPDATEVDEF, "%s" % TEMPCELCLINE, "%s" % TEMPCELCGPRINT]
+        elif action == 'temperature_f':
+            args += ["--title", "Temperature", "--vertical-label", "degrees", "%s" % TEMPDEF, "%s" %
+                     TEMPFAHRCDEF, "%s" % TEMPDATEVDEF, "%s" % TEMPFAHRLINE, "%s" % TEMPFAHRGPRINT]
         elif action == 'temperature_cpu':
-            args += ["--vertical-label", "degrees f", "%s" % CPUTEMPDEF, "%s" %
-                     CPUFAHRCDEF, "%s" % CPUFAHRVDEF, "%s" % CPUFAHRLINE, "%s" % CPUFAHRGPRINT]
+            args += ["--title", "CPU Temperature", "--vertical-label", "degrees", "%s" % CPUTEMPDEF, "%s" %
+                     CPUFAHRCDEF, "%s" % CPUDATEVDEF, "%s" % CPUCELCLINE, "%s" % CPUCELCGPRINT]
         elif action == 'pressure':
-            args += ["--vertical-label", "millibars", "--upper-limit", "1100", "--lower-limit",
-                     "850", "%s" % PRESDEF, "%s" % PRESVDEF, "%s" % PRESLINE, "%s" % PRESGPRINT]
+            args += ["--title", "Pressure", "--vertical-label", "millibars", "--upper-limit", "1100", "--lower-limit",
+                     "850", "%s" % PRESDEF, "%s" % PRESDATEVDEF, "%s" % PRESLINE, "%s" % PRESGPRINT]
         elif action == 'compass':
-            args += ["--vertical-label", "degrees", "%s" % COMPDEF,
-                     "%s" % COMPVDEF, "%s" % COMPLINE, "%s" % COMPGPRINT]
+            args += ["--title", "Compass", "--vertical-label", "degrees", "%s" % COMPDEF,
+                     "%s" % COMPDATEVDEF, "%s" % COMPLINE, "%s" % COMPGPRINT]
         else:
             raise web.notfound()
 
