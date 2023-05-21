@@ -49,5 +49,5 @@ MAXTEMP=
 
 To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command line:
 ```sh
-sense-hat-rest.py
+sudo sense-hat-rest.py
 ```
