@@ -42,6 +42,16 @@ To view historical temperature data, navigate to the html directory: `http://ras
 
 ![temperature](./images/temperature.png)
 
+To view live temperature on the LED, GET temperature from the display directory: `http://raspberrypi:8080/display/temperature_c`
+
+```sh
+curl -s http://raspberrypi:8080/display/temperature_c
+13.3C
+```
+![display](./images/display.webp)
+
+_The above image was emulated with [trinket](https://trinket.io/python/47c7c9a5f6?outputOnly=true&runOption=run)_
+
 ### IFTTT event
 
 To trigger an IFTTT temperature event, create a webhook applet at [ifttt.com](https://ifttt.com/create/if-maker_webhooks) with a sense_hat event and update [sense-hat-rest.conf](./sense-hat-rest.conf) with your key and sensor values: 

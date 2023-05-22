@@ -185,6 +185,7 @@ PASTSENSORS = RRDSENSORS + ['all']
 IMAGES = ['humidity', 'temperature_c', 'temperature_f',
           'pressure', 'compass', 'temperature_cpu']
 HTML = IMAGES + ['all']
+DISPLAY = IMAGES
 
 # web api
 urls = (
@@ -192,6 +193,7 @@ urls = (
     '/past/(.*)', 'get_past',
     '/image/(.*)', 'get_image',
     '/html/(.*)', 'get_html',
+    '/display/(.*)', 'get_display',
     '/', 'get_index'
 )
 
@@ -250,31 +252,31 @@ class get_image:
         HUMIDDEF = 'DEF:humidity=%s:humidity:MAX' % DBFILE
         HUMIDDATEVDEF = 'VDEF:date=humidity,LAST'
         HUMIDLINE = 'LINE2:humidity#0000FF:humidity'
-        HUMIDGPRINT = 'GPRINT:humidity:LAST:Current\: %.1lf'
+        HUMIDGPRINT = 'GPRINT:humidity:LAST:Current\: %.1lf%%'
 
         TEMPDEF = 'DEF:temperature=%s:temperature:MAX' % DBFILE
         TEMPDATEVDEF = 'VDEF:date=temperature,LAST'
         TEMPFAHRCDEF = 'CDEF:tempfahr=9,5,/,temperature,*,32,+'  # conversion of C to F
         TEMPFAHRLINE = 'LINE2:tempfahr#FFA500:fahrenheit'
-        TEMPFAHRGPRINT = 'GPRINT:tempfahr:LAST:Current\: %.1lfF'
-        TEMPCELCLINE = 'LINE2:temperature#FF0000:celcius'
-        TEMPCELCGPRINT = 'GPRINT:temperature:LAST:Current\: %.1lfC'
+        TEMPFAHRGPRINT = 'GPRINT:tempfahr:LAST:Current\: %.1lf\u2109'
+        TEMPCELCLINE = 'LINE2:temperature#FF0000:celsius'
+        TEMPCELCGPRINT = 'GPRINT:temperature:LAST:Current\: %.1lf\u2103'
 
         CPUTEMPDEF = 'DEF:temperature_cpu=%s:temperature_cpu:MAX' % DBFILE
         CPUFAHRCDEF = 'CDEF:cpufahr=9,5,/,temperature_cpu,*,32,+'  # conversion of C to F
         CPUDATEVDEF = 'VDEF:date=temperature_cpu,LAST'
-        CPUCELCLINE = 'LINE2:temperature_cpu#FF0000:celcius'
-        CPUCELCGPRINT = 'GPRINT:temperature_cpu:LAST:Current\: %.1lfC'
+        CPUCELCLINE = 'LINE2:temperature_cpu#FF0000:celsius'
+        CPUCELCGPRINT = 'GPRINT:temperature_cpu:LAST:Current\: %.1lf\u2103'
 
         PRESDEF = 'DEF:pressure=%s:pressure:MAX' % DBFILE
         PRESDATEVDEF = 'VDEF:date=pressure,LAST'
         PRESLINE = 'LINE2:pressure#00FF00:pressure'
-        PRESGPRINT = 'GPRINT:pressure:LAST:Current\: %.1lf'
+        PRESGPRINT = 'GPRINT:pressure:LAST:Current\: %.1lfmb'
 
         COMPDEF = 'DEF:compass=%s:compass:MAX' % DBFILE
         COMPDATEVDEF = 'VDEF:date=compass,LAST'
-        COMPLINE = 'LINE2:compass#FFFF00:compass'
-        COMPGPRINT = 'GPRINT:compass:LAST:Current\: %.1lf'
+        COMPLINE = 'LINE2:compass#FFFF00:north'
+        COMPGPRINT = 'GPRINT:compass:LAST:Current\: %.1lfN'
 
         DATEGPRINT = 'GPRINT:date:%F %R:strftime'
 
@@ -334,11 +336,13 @@ class get_html:
             DBSTEP, sensor)
         if action in IMAGES:
             image = '/image/%s%s' % (sensor, query)
-            data += '<a href="%s" target="_blank"><img src="%s"/></a>' % (image, image)
+            data += '<a href="%s" target="_blank"><img src="%s"/></a>' % (
+                image, image)
         elif action == 'all':
             for i in IMAGES:
                 image = '/image/%s%s' % (i, query)
-                data += '<a href="%s"target="_blank"><img src="%s"/></a>' % (image, image)
+                data += '<a href="%s"target="_blank"><img src="%s"/></a>' % (
+                    image, image)
         else:
             raise web.notfound()
         data += '</html>'
@@ -346,6 +350,44 @@ class get_html:
         web.header("Content-Type", "text/html")
 
         return data
+
+# returns string of live sensor data
+
+
+class get_display:
+    def GET(self, action):
+        data = {}
+        value = "0"
+
+        if action in DISPLAY:
+            data = get_sensor(action)
+            if action == 'humidity':
+                value = "%.1f%%" % data["humidity"]
+                sense.show_message(value, text_colour=[0, 0, 255])
+            elif action == 'temperature_c':
+                data = get_sensor('temperature')
+                value = "%.1fC" % data["temperature"]
+                sense.show_message(value, text_colour=[255, 0, 0])
+            elif action == 'temperature_f':
+                data = get_sensor('temperature')
+                value = "%.1fF" % celsiustofahr(data["temperature"])
+                sense.show_message(value, text_colour=[255, 165, 0])
+            elif action == 'pressure':
+                value = "%.1fmb" % data["pressure"]
+                sense.show_message(value, text_colour=[0, 255, 0])
+            elif action == 'compass':
+                value = "%.1fN" % data["compass"]
+                sense.show_message(value, text_colour=[255, 255, 0])
+            elif action == 'temperature_cpu':
+                value = "%.1fC" % data["temperature_cpu"]
+                sense.show_message(value, text_colour=[255, 0, 0])
+
+        else:
+            raise web.notfound()
+
+        web.header('Content-Type', 'application/json')
+
+        return value
 
 # returns usage page
 
@@ -391,6 +433,14 @@ class get_index:
             data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
         data = data[:-1]  # remove last '|'
         data += ']%s</p>' % IMAGEPARAMS
+
+        data += '<br><h2>Display sensor on LED</h2>'
+        url = '%s/display/' % host
+        data += '<p>%s[' % url
+        for i in DISPLAY:
+            data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
+        data = data[:-1]  # remove last '|'
+        data += ']</p>'
 
         data += '<br><footer>'
         data += 'Copyright %s <a href="https://github.com/jithware/sense-hat-rest" target="_blank">Jithware</a>' % year
