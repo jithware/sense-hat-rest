@@ -19,15 +19,18 @@ config = configparser.ConfigParser(allow_no_value=True)
 config.read("/etc/sense-hat-rest.conf")
 
 
-# OPTIONAL: clean shutdown when joystick held down
+# option when joystick held down
+MIDHELD = config.get('sense-hat', 'MIDHELD')
 
 
 def pushed_middle(event):
-    if event.action == ACTION_HELD:
-        sense.clear(255, 0, 0)
-        time.sleep(1)
-        sense.clear()
-        os.system('poweroff')
+    if event.action == ACTION_HELD and MIDHELD:
+        if MIDHELD == 'reboot' or MIDHELD == 'poweroff':
+            sense.clear(255, 0, 0)
+            time.sleep(1)
+            sense.clear()
+            time.sleep(1)
+            subprocess.run(MIDHELD, shell=True)
 
 
 sense.stick.direction_middle = pushed_middle
