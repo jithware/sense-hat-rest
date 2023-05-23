@@ -22,27 +22,38 @@ get() {
     echo "Success (200): $1"
 }
 
+# Index
+echo "Getting index..."
+get "$URL"
+
 # Live sensors
+echo "Getting live sensors..."
 for sensor in "${LIVESENSORS[@]}"; do
      get "$URL/live/$sensor" 
 done
 
 # Past sensors
+echo "Getting past sensors..."
 for sensor in "${PASTSENSORS[@]}"; do
      get "$URL/past/$sensor" 
 done
 
 # Images
+echo "Getting images..."
 for sensor in "${IMAGES[@]}"; do
      get "$URL/image/$sensor" 
 done
 
 # Html
+echo "Getting htmls..."
 for sensor in "${HTML[@]}"; do
      get "$URL/html/$sensor" 
 done
 
 # Display
+echo "Getting displays..."
 for sensor in "${DISPLAY[@]}"; do
      get "$URL/display/$sensor" 
 done
+
+echo "Tests completed successfully!"
