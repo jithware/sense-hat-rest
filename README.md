@@ -21,9 +21,10 @@ cd sense-hat-rest
 
 ## Usage
 
+### API documentation
 For full api documentation, navigate to the sense-hat-rest [port](https://github.com/jithware/sense-hat-rest/blob/master/sense-hat-rest.service#L6) on your Raspberry Pi: `http://raspberrypi:8080/` 
 
-### Examples
+### Live temperature json
 To retrieve live temperature json, GET temperature from the live directory: `http://raspberrypi:8080/live/temperature`
 
 ```sh
@@ -31,17 +32,20 @@ curl -s http://raspberrypi:8080/live/temperature
 {"temperature": 16.162643432617188}
 ```
 
-To retrieve historical temperature json, GET temperature from the past directory: `http://raspberrypi:8080/past/temperature`
+### Past temperature json
+To retrieve past temperature json, GET temperature from the past directory: `http://raspberrypi:8080/past/temperature`
 
 ```sh
 curl -s http://raspberrypi:8080/past/temperature?start=10m
 {"meta": {"start": 1684696560, "end": 1684697220, "step": 60, "rows": 11, "columns": 1, "legend": ["temperature"]}, "data": [[15.988164344996578], [15.923168208224487], [15.866838042416385], [15.864454833753204], [15.97578711801058], [15.895773634887693], [15.894235919783785], [15.910474543874104], [15.89725421391983], [15.908842296578978], [null]]}
 ```
 
-To view historical temperature data, navigate to the html directory: `http://raspberrypi:8080/html/temperature`
+### Past temperature images
+To view past temperature images, navigate to the html directory: `http://raspberrypi:8080/html/temperature`
 
 ![temperature](./images/temperature.png)
 
+### Live temperature on LED
 To view live temperature on the LED, GET temperature from the display directory: `http://raspberrypi:8080/display/temperature_c`
 
 ```sh
@@ -69,3 +73,15 @@ To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command l
 ```sh
 sudo ./sense-hat-rest.py 8081 ./sense-hat-rest.conf
 ```
+
+## Versioning
+
+sense-hat-rest uses the following [software versioning](https://en.wikipedia.org/wiki/Software_versioning):
+
+_major.minor.maintenance_ (example: 1.2.3)
+
+Examples updates:
+
+* major = application rewrite
+* minor = API addition or change
+* maintenance = enhancements and bug fixes
