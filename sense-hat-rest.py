@@ -10,13 +10,18 @@ import os
 import subprocess
 import configparser
 import requests
+import sys
 from datetime import datetime
 from sense_hat import SenseHat, ACTION_HELD
 
 sense = SenseHat()
 
 config = configparser.ConfigParser(allow_no_value=True)
-config.read("/etc/sense-hat-rest.conf")
+
+if len(sys.argv) == 3 and sys.argv[2]:
+    config.read(sys.argv[2])  # optional config file argument
+else:
+    config.read("/etc/sense-hat-rest.conf")
 
 
 # option when joystick held down
@@ -175,7 +180,7 @@ DBDAYS = config.getint('rrd', 'DBDAYS')  # number of days to retain data
 if not (os.path.exists(DBFILE)):
     args = ["--start", "N", "--step", "%s" % DBSTEP, "DS:humidity:GAUGE:%s:0:100" % (DBSTEP*2), "DS:temperature:GAUGE:%s:-100:100" % (DBSTEP*2), "DS:temperature_cpu:GAUGE:%s:-100:100" % (
         DBSTEP*2), "DS:pressure:GAUGE:%s:850:1100" % (DBSTEP*2), "DS:compass:GAUGE:%s:0:360" % (DBSTEP*2), "RRA:MAX:0.5:1:%s" % (int(60/DBSTEP*60*24*DBDAYS))]
-    print('Creating database' + DBFILE + ' with args ', args)
+    print('Creating database: ' + DBFILE + ' with args ', args)
     rrdtool.create(DBFILE, args)
 
 # start sensor data gather thread
