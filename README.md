@@ -83,5 +83,5 @@ _major.minor.maintenance_ (example: 1.2.3)
 Examples updates:
 
 * major = application rewrite
-* minor = API addition or change
+* minor = API or configuration addition or change
 * maintenance = enhancements and bug fixes
