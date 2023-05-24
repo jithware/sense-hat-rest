@@ -24,6 +24,8 @@ cd sense-hat-rest
 ### API documentation
 For full api documentation, navigate to the sense-hat-rest [port](https://github.com/jithware/sense-hat-rest/blob/master/sense-hat-rest.service#L6) on your Raspberry Pi: `http://raspberrypi:8080/` 
 
+The following are example calls to the temperature API. Humidity, pressure, compass, cpu temperature and others, is also available.
+
 ### Live temperature json
 To retrieve live temperature json, GET temperature from the live directory: `http://raspberrypi:8080/live/temperature`
 
