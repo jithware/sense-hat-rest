@@ -73,7 +73,7 @@ MAXTEMP=
 
 To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command line with a different port and config file:
 ```sh
-sudo ./sense-hat-rest.py 8081 ./sense-hat-rest.conf
+./sense-hat-rest.py 8081 ./sense-hat-rest.conf
 ```
 
 ## Versioning

@@ -41,14 +41,15 @@ def pushed_middle(event):
 sense.stick.direction_middle = pushed_middle
 
 # get sensor data
-TEMPCALIB = config.getfloat('sense-hat', 'TEMPCALIB')
+HUMIDCALIB = config.getfloat('sense-hat', 'HUMIDCALIB', fallback=0)
+TEMPCALIB = config.getfloat('sense-hat', 'TEMPCALIB', fallback=0)
 
 
 def get_sensor(sensor):
     data = {}
 
     if sensor == 'humidity':
-        data[sensor] = sense.humidity
+        data[sensor] = sense.humidity + HUMIDCALIB
     elif sensor == 'temperature':
         data[sensor] = sense.temperature + TEMPCALIB
     elif sensor == 'temperature_from_humidity':
