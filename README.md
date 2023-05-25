@@ -1,6 +1,6 @@
 # The Sense HAT Raspberry Pi REST API
 
-This project exposes a REST end point on a [Raspberry Pi](https://www.raspberrypi.com/) equiped with a [Sense HAT](https://www.raspberrypi.org/products/sense-hat/).
+This project exposes a REST API on a [Raspberry Pi](https://www.raspberrypi.com/) equiped with a [Sense HAT](https://www.raspberrypi.org/products/sense-hat/).
 
 The following commands are run on your Raspberry Pi:
 
@@ -22,9 +22,9 @@ cd sense-hat-rest
 ## Usage
 
 ### API documentation
-For full api documentation, navigate to the sense-hat-rest [port](https://github.com/jithware/sense-hat-rest/blob/master/sense-hat-rest.service#L6) on your Raspberry Pi: `http://raspberrypi:8080/` 
+For the full Sense Hat REST API documentation, navigate to the defined [port](https://github.com/search?q=repo%3Ajithware%2Fsense-hat-rest+ExecStart&type=code) and root directory on your Raspberry Pi: `http://raspberrypi:8080/` 
 
-The following are example calls to the temperature API. Humidity, pressure, compass, cpu temperature and others, is also available.
+The following are example calls to the temperature API. Humidity, pressure, compass, cpu temperature and others, are also available.
 
 ### Live temperature json
 To retrieve live temperature json, GET temperature from the live directory: `http://raspberrypi:8080/live/temperature`
@@ -43,7 +43,7 @@ curl -s http://raspberrypi:8080/past/temperature?start=10m
 ```
 
 ### Past temperature images
-To view past temperature images, navigate to the html directory: `http://raspberrypi:8080/html/temperature`
+To view past temperature images, navigate to the html directory: `http://raspberrypi:8080/html/temperature_f`
 
 ![temperature](./images/temperature.png)
 
@@ -71,14 +71,15 @@ MAXTEMP=
 
 ## Debug
 
-To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command line with a different port and config file:
+To debug issues, run [sense-hat-rest.py](./sense-hat-rest.py) from the command line with a different port and [sense-hat-rest.conf](./sense-hat-rest.conf) file:
 ```sh
 ./sense-hat-rest.py 8081 ./sense-hat-rest.conf
 ```
+You can also debug in [Visual Studio Code](https://code.visualstudio.com/download) using the [launch.json](./.vscode/launch.json)
 
 ## Versioning
 
-sense-hat-rest uses the following [software versioning](https://en.wikipedia.org/wiki/Software_versioning):
+sense-hat-rest [releases](https://github.com/jithware/sense-hat-rest/releases) use the following [software versioning](https://en.wikipedia.org/wiki/Software_versioning):
 
 _major.minor.maintenance_ (example: 1.2.3)
 
