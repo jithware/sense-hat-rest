@@ -341,7 +341,10 @@ class get_html:
         sensor = str(action)
         query = '?start=%s&width=%s&height=%s' % (start, width, height)
 
-        data = '<html><head><meta http-equiv="refresh" content="%s"><title>%s</title></head>' % (
+        data = '<html><head>'
+        data += '<link rel="icon" type="image/png" href="/static/%s.ico">' % (
+            action)
+        data += '<meta http-equiv="refresh" content="%s"><title>%s</title></head>' % (
             DBSTEP, sensor)
         if action in IMAGES:
             image = '/image/%s%s' % (sensor, query)
@@ -409,7 +412,7 @@ class get_index:
         IMAGEPARAMS = PARAMS + '[&width=n][&height=n]'
         year = datetime.now().strftime("%Y")
 
-        data = '<html><head><title>%s</title></head>' % TITLE
+        data = '<html><head><link rel="icon" type="image/png" href="/static/favicon.ico"><title>%s</title></head>' % TITLE
         data += '<h1>%s</h1>' % TITLE
         data += '<h2>Live sensor json</h2>'
         url = '%s/live/' % host

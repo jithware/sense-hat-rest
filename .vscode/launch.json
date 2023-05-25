@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: sense-hat-rest.py",
+            "type": "python",
+            "request": "launch",
+            "program": "sense-hat-rest.py",
+            "console": "internalConsole",
+            "args": [
+                "8081",
+                "sense-hat-rest.conf"
+            ]
+        }
+    ]
+}
