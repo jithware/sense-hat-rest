@@ -3,8 +3,10 @@ Description=Sense HAT Raspberry Pi REST API
 After=network.target 
 
 [Service]
-ExecStart=/usr/bin/sense-hat-rest.py 8080
+WorkingDirectory=/usr/share/sense-hat-rest
+ExecStart=/usr/share/sense-hat-rest/sense-hat-rest.py 8080
 StandardOutput=null
+StandardError=null
  
 [Install]
 WantedBy=multi-user.target
