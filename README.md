@@ -45,7 +45,7 @@ curl -s http://raspberrypi:8080/past/temperature?start=10m
 ### Past temperature images
 To view past temperature images, navigate to the html directory: `http://raspberrypi:8080/html/temperature_f`
 
-![temperature](./images/temperature.png)
+![temperature_f](./images/temperature_f.png)
 
 ### Live temperature on LED
 To view live temperature on the LED, GET temperature from the display directory: `http://raspberrypi:8080/display/temperature_c`
