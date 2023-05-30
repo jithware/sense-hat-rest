@@ -374,7 +374,8 @@ class get_csv:
         input = web.input(start='1h')  # defaults
         start = str(input.start)
         sensor = str(action)
-        args = ["--start", "-%s" % start, "--json"]
+        args = ["--start", "-%s" %
+                start, "--maxrows", "1000", "--json"]
         if action in CSV:
             elements = ["DEF:%s=%s:%s:MAX" %
                         (sensor, DBFILE, sensor), "XPORT:%s:%s" % (sensor, sensor)]
@@ -401,7 +402,7 @@ class get_csv:
 
         return df.to_csv(index=False)
 
-# returns string of live sensor data
+# returns string of live sensor data and displays on LED
 
 
 class get_display:
