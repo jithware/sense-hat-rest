@@ -9,9 +9,10 @@ CURL="curl -sS"
 
 RRDSENSORS=('humidity' 'temperature' 'pressure' 'compass' 'temperature_cpu')
 LIVESENSORS=(${RRDSENSORS[@]} 'temperature_from_humidity' 'temperature_from_pressure' 'orientation_radians' 'orientation_degrees'  'orientation' 'compass_raw' 'gyroscope' 'gyroscope_raw' 'accelerometer' 'accelerometer_raw')
-PASTSENSORS=(${RRDSENSORS[@]} 'all')
+JSON=(${RRDSENSORS[@]} 'all')
 IMAGES=('humidity' 'temperature_c' 'temperature_f' 'pressure' 'compass' 'temperature_cpu')
 HTML=(${IMAGES[@]} 'all')
+CSV=(${RRDSENSORS[@]})
 DISPLAY=(${IMAGES[@]})
 
 get() {
@@ -55,10 +56,10 @@ for sensor in "${LIVESENSORS[@]}"; do
      getjson "$URL/live/$sensor"
 done
 
-# Past sensors
-echo "Testing past sensors..."
-for sensor in "${PASTSENSORS[@]}"; do
-     getjson "$URL/past/$sensor"
+# Json 
+echo "Testing jsons..."
+for sensor in "${JSON[@]}"; do
+     getjson "$URL/json/$sensor"
 done
 
 # Images
@@ -71,6 +72,12 @@ done
 echo "Testing htmls..."
 for sensor in "${HTML[@]}"; do
      get "$URL/html/$sensor" 
+done
+
+# Csv
+echo "Testing csvs..."
+for sensor in "${CSV[@]}"; do
+     get "$URL/csv/$sensor" 
 done
 
 # Display

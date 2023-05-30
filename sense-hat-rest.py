@@ -11,6 +11,7 @@ import subprocess
 import configparser
 import requests
 import sys
+import pandas as pd
 from datetime import datetime
 from sense_hat import SenseHat, ACTION_HELD
 
@@ -190,18 +191,20 @@ thread.start()
 
 LIVESENSORS = RRDSENSORS + ['temperature_from_humidity', 'temperature_from_pressure', 'orientation_radians',
                             'orientation_degrees', 'orientation', 'compass_raw', 'gyroscope', 'gyroscope_raw', 'accelerometer', 'accelerometer_raw']
-PASTSENSORS = RRDSENSORS + ['all']
+JSON = RRDSENSORS + ['all']
 IMAGES = ['humidity', 'temperature_c', 'temperature_f',
           'pressure', 'compass', 'temperature_cpu']
 HTML = IMAGES + ['all']
+CSV = RRDSENSORS
 DISPLAY = IMAGES
 
 # web api
 urls = (
     '/live/(.*)', 'get_live',
-    '/past/(.*)', 'get_past',
+    '/json/(.*)', 'get_json',
     '/image/(.*)', 'get_image',
     '/html/(.*)', 'get_html',
+    '/csv/(.*)', 'get_csv',
     '/display/(.*)', 'get_display',
     '/', 'get_index'
 )
@@ -227,7 +230,7 @@ class get_live:
 # returns json of past sensor data
 
 
-class get_past:
+class get_json:
     def GET(self, action):
         input = web.input(start='1h')  # defaults
         start = str(input.start)
@@ -244,11 +247,11 @@ class get_past:
         else:
             raise web.notfound()
 
-        data = rrdtool.xport(elements, args)
+        export = rrdtool.xport(elements, args)
 
         web.header('Content-Type', 'application/json')
 
-        return json.dumps(data)
+        return json.dumps(export)
 
 # returns a image of sensor over time
 
@@ -363,6 +366,41 @@ class get_html:
 
         return data
 
+# returns csv of past sensor data
+
+
+class get_csv:
+    def GET(self, action):
+        input = web.input(start='1h')  # defaults
+        start = str(input.start)
+        sensor = str(action)
+        args = ["--start", "-%s" % start, "--json"]
+        if action in CSV:
+            elements = ["DEF:%s=%s:%s:MAX" %
+                        (sensor, DBFILE, sensor), "XPORT:%s:%s" % (sensor, sensor)]
+        else:
+            raise web.notfound()
+
+        export = rrdtool.xport(elements, args)
+        start_time = export['meta']['start']
+        step = export['meta']['step']
+        data = export['data']
+        series = []
+        current_time = start_time
+        for entry in data:
+            current_time += step
+            dt = current_time
+            dt = datetime.utcfromtimestamp(dt)
+            value = entry[0]
+            if value is None:
+                continue
+            series.append([dt, value])
+        df = pd.DataFrame.from_records(series, columns=["Time", "Value"])
+
+        web.header('Content-Type', 'text/csv')
+
+        return df.to_csv(index=False)
+
 # returns string of live sensor data
 
 
@@ -414,6 +452,7 @@ class get_index:
 
         data = '<html><head><link rel="icon" type="image/png" href="/static/favicon.ico"><title>%s</title></head>' % TITLE
         data += '<h1>%s</h1>' % TITLE
+
         data += '<h2>Live sensor json</h2>'
         url = '%s/live/' % host
         data += '<p>%s[' % url
@@ -423,9 +462,9 @@ class get_index:
         data += ']</p>'
 
         data += '<br><h2>Past sensor json</h2>'
-        url = '%s/past/' % host
+        url = '%s/json/' % host
         data += '<p>%s[' % url
-        for i in PASTSENSORS:
+        for i in JSON:
             data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
         data = data[:-1]  # remove last '|'
         data += ']%s</p>' % PARAMS
@@ -445,6 +484,14 @@ class get_index:
             data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
         data = data[:-1]  # remove last '|'
         data += ']%s</p>' % IMAGEPARAMS
+
+        data += '<br><h2>Past sensor csv</h2>'
+        url = '%s/csv/' % host
+        data += '<p>%s[' % url
+        for i in CSV:
+            data += '<a href="%s%s" target="_blank">%s</a>|' % (url, i, i)
+        data = data[:-1]  # remove last '|'
+        data += ']%s</p>' % PARAMS
 
         data += '<br><h2>Display sensor on LED</h2>'
         url = '%s/display/' % host

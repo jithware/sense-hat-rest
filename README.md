@@ -35,10 +35,10 @@ curl -s http://raspberrypi:8080/live/temperature
 ```
 
 ### Past temperature json
-To retrieve past temperature json, GET temperature from the past directory: `http://raspberrypi:8080/past/temperature`
+To retrieve past temperature json, GET temperature from the json directory: `http://raspberrypi:8080/json/temperature`
 
 ```sh
-curl -s http://raspberrypi:8080/past/temperature?start=10m
+curl -s http://raspberrypi:8080/json/temperature?start=10m
 {"meta": {"start": 1684696560, "end": 1684697220, "step": 60, "rows": 11, "columns": 1, "legend": ["temperature"]}, "data": [[15.988164344996578], [15.923168208224487], [15.866838042416385], [15.864454833753204], [15.97578711801058], [15.895773634887693], [15.894235919783785], [15.910474543874104], [15.89725421391983], [15.908842296578978], [null]]}
 ```
 
@@ -46,6 +46,24 @@ curl -s http://raspberrypi:8080/past/temperature?start=10m
 To view past temperature images, navigate to the html directory: `http://raspberrypi:8080/html/temperature_f`
 
 ![temperature_f](./images/temperature_f.png)
+
+### Past temperature csv
+To retrieve past temperature csv, GET temperature from the csv directory: `http://raspberrypi:8080/csv/temperature`
+
+```sh
+curl -s http://raspberrypi:8080/csv/temperature?start=10m
+Time,Value
+2023-05-30 13:20:00,14.91828549270045
+2023-05-30 13:21:00,14.844423914351717
+2023-05-30 13:22:00,14.840690235732142
+2023-05-30 13:23:00,14.860207656819915
+2023-05-30 13:24:00,14.952083470060098
+2023-05-30 13:25:00,14.746724529181863
+2023-05-30 13:26:00,14.820525270960808
+2023-05-30 13:27:00,14.745810363705255
+2023-05-30 13:28:00,14.839941873714192
+```
+
 
 ### Live temperature on LED
 To view live temperature on the LED, GET temperature from the display directory: `http://raspberrypi:8080/display/temperature_c`
